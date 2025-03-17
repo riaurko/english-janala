@@ -2,7 +2,8 @@
 ? Fetch Levels Data from API and display them on Site and show the Active one diff-styled Dynamically.
 ? Fetch Words Data from API and display them on Site with Pretty Design like Figma.
 ? If no Words exist in a Lesson, then show an Error-like Message.
-! Build Vocabulary Details Modal for every Vocabulary Words Dynamically.
+? Build Vocabulary Details Modal for every Vocabulary Words Dynamically.
+! Apply Code-based LogIn and LogOut System
 */
 
 
@@ -39,6 +40,12 @@ const displayLessons = (lessons) => {
 document.getElementById('lesson-picker').addEventListener('click', function(event){
     if (event.target.classList.contains('lesson'))
     {
+        //? Deactivating previously activated Lesson Boxes
+        const lessons = document.querySelectorAll('#lesson-picker div');
+        lessons.forEach(lesson => {
+            lesson.classList.replace('text-[#E0E7FF]', 'text-primary');
+            lesson.classList.remove('bg-primary');
+        })
         //? Activating the Clicked Lesson Box
         event.target.classList.replace('text-primary', 'text-[#E0E7FF]');
         event.target.classList.add('bg-primary');
@@ -76,7 +83,10 @@ const displayWords = (words) => {
         wordNameEl.innerText = wordName;
         wordNameEl.classList.add('text-3xl', 'font-bold', 'text-center', 'font-english');
         const wordMP = document.createElement('h3');
-        wordMP.innerText = `"${wordMeaning} / ${wordPronunciation}"`;
+        if (!wordMeaning)
+            wordMP.innerText = `"অর্থ নেই / ${wordPronunciation}"`;
+        else
+            wordMP.innerText = `"${wordMeaning} / ${wordPronunciation}"`;
         wordMP.classList.add('text-[1.75rem]', 'font-semibold', 'text-center', 'text-zinc-700', 'font-bangla');
         const MPSyntax = document.createElement('h6');
         MPSyntax.innerText = "Meaning / Pronunciation";
@@ -118,23 +128,21 @@ document.getElementById('lesson-content').addEventListener('click', function(eve
         .then(data => {
             showWordModal(data.data);
         })
-        // const wordMP = wordInfo.querySelectorAll('h3')[1].innerText.split('/');
-        // const wordPronun = wordMP[wordMP.length - 1].replace('"', '');
-        // wordMP.pop();
-        // const wordMeaning = [...wordMP];
-        // wordMeaning[0] = wordMeaning[0].split('"')[1];
     }
 })
 
 const showWordModal = (word) => {
     const synonymsContainer = document.createElement('div');
     synonymsContainer.classList.add('flex', 'gap-4');
-    for (const synonym of word.synonyms)
+    if (word.synonyms)
     {
-        const synonymEl = document.createElement('h6');
-        synonymEl.innerText = synonym;
-        synonymEl.classList.add('font-bangla', 'text-xl', 'bg-blue-100', 'px-5', 'py-2', 'rounded-lg', 'border', 'border-[#DDD]');
-        synonymsContainer.appendChild(synonymEl);
+        for (const synonym of word.synonyms)
+        {
+            const synonymEl = document.createElement('h6');
+            synonymEl.innerText = synonym;
+            synonymEl.classList.add('font-bangla', 'text-xl', 'bg-blue-100', 'px-5', 'py-2', 'rounded-lg', 'border', 'border-[#DDD]');
+            synonymsContainer.appendChild(synonymEl);
+        }
     }
     const modal = document.createElement('dialog');
     modal.classList.add('modal', 'bg-[#DDDDFF70]', 'p-6', 'rounded-xl', 'space-y-6', 'backdrop-blur');
@@ -143,7 +151,7 @@ const showWordModal = (word) => {
         <h2 class="text-4xl font-semibold font-english">${word.word} (<span class="font-bangla"><span class="fas fa-microphone-lines"></span> : ${word.pronunciation}</span>)</h2>
         <div class="space-y-3">
             <h4 class="text-2xl font-semibold font-english">Meaning</h4>
-            <h4 class="text-2xl font-bangla">${word.meaning}</h4>
+            <h4 class="text-2xl font-bangla">${word.meaning ? word.meaning : "অর্থ পাওয়া যায়নি"}</h4>
         </div>
         <div class="space-y-3">
             <h4 class="text-2xl font-semibold font-english">Example</h4>
@@ -163,4 +171,42 @@ const showWordModal = (word) => {
     modal.addEventListener('close', function(){
         delete document.body.removeChild(modal);
     })
+}
+
+
+//! Task-5
+
+document.getElementById('login-form').addEventListener('submit', function(event){
+    event.preventDefault();
+    const username = event.target.parentNode.querySelector('input[type="text"]').value;
+    const password = event.target.parentNode.querySelector('input[type="password"]').value;
+    LoginUser(username, password);
+    event.target.parentNode.querySelector('input[type="text"]').value = '';
+    event.target.parentNode.querySelector('input[type="password"]').value = '';
+})
+
+const LoginUser = (username, password) => {
+    if (username === '')
+        window.alert("Please enter the Username.");
+    else if (password !== "123456")
+        window.alert("Please enter the correct password.");
+    else
+    {
+        document.querySelector('header').classList.remove('hidden');
+        document.getElementById('vocabularies').classList.remove('hidden');
+        document.getElementById('faq').classList.remove('hidden');
+        document.getElementById('banner').classList.add('hidden');
+        window.alert("You are logged in successfully!");
+    }
+}
+
+document.querySelector('#nav-btns > button').addEventListener('click', function(){
+    LogoutUser();
+});
+
+const LogoutUser = () => {
+    document.querySelector('header').classList.add('hidden');
+    document.getElementById('vocabularies').classList.add('hidden');
+    document.getElementById('faq').classList.add('hidden');
+    document.getElementById('banner').classList.remove('hidden');
 }
